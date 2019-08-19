@@ -9,101 +9,6 @@ namespace ConsoleApplication1
 {
     class FileService
     {
-
-        public static List<ClosingPriceInfo> ClosingPrices(long insCode)
-        {
-            List<ClosingPriceInfo> closingPriceInfoList = new List<ClosingPriceInfo>();
-            try
-            {
-                if (!File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\TseClient 2.0\\Files\\Instruments\\" + insCode.ToString() + ".csv"))
-                    return closingPriceInfoList;
-                using (StreamReader streamReader = new StreamReader((Stream)File.OpenRead(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\TseClient 2.0\\Files\\Instruments\\" + insCode.ToString() + ".csv")))
-                {
-                    while (!streamReader.EndOfStream)
-                    {
-                        string[] strArray = streamReader.ReadLine().Split(',');
-                        closingPriceInfoList.Add(new ClosingPriceInfo()
-                        {
-                            InsCode = Convert.ToInt64(strArray[0].ToString()),
-                            DEven = Convert.ToInt32(strArray[1].ToString()),
-                            PClosing = Convert.ToDecimal(strArray[2].ToString()),
-                            PDrCotVal = Convert.ToDecimal(strArray[3].ToString()),
-                            ZTotTran = Convert.ToDecimal(strArray[4].ToString()),
-                            QTotTran5J = Convert.ToDecimal(strArray[5].ToString()),
-                            QTotCap = Convert.ToDecimal(strArray[6].ToString()),
-                            PriceMin = Convert.ToDecimal(strArray[7].ToString()),
-                            PriceMax = Convert.ToDecimal(strArray[8].ToString()),
-                            PriceYesterday = Convert.ToDecimal(strArray[9].ToString()),
-                            PriceFirst = Convert.ToDecimal(strArray[10].ToString())
-                        });
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            return closingPriceInfoList;
-        }
-
-
-        
-        public static List<ColumnInfo> ColumnsInfo()
-        {
-            return FileService.ColumnsInfo("Columns.csv");
-        }
-        public static List<ColumnInfo> ColumnsInfo(string fileName)
-        {
-            List<ColumnInfo> columnInfoList = new List<ColumnInfo>();
-            try
-            {
-                using (StreamReader streamReader = new StreamReader((Stream)File.OpenRead(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\TseClient 2.0\\Files\\" + fileName)))
-                {
-                    while (!streamReader.EndOfStream)
-                    {
-                        string[] strArray = streamReader.ReadLine().Split(',');
-                        columnInfoList.Add(new ColumnInfo()
-                        {
-                            Index = Convert.ToInt32(strArray[0].ToString()),
-                            Type = (ColumnType)Enum.Parse(typeof(ColumnType), strArray[1].ToString()),
-                            Header = strArray[2].ToString(),
-                            Visible = strArray[3].ToString().Equals("1")
-                        });
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            return columnInfoList;
-        }
-        public static void WriteOutputExcel(InstrumentInfo instrument, List<ClosingPriceInfo> cp)
-        {
-            return;
-        }
-
-        public static List<string> SelectedInstruments()
-        {
-            List<string> stringList = new List<string>();
-            try
-            {
-                using (StreamReader streamReader = new StreamReader((Stream)File.OpenRead(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\TseClient 2.0\\Files\\SelectedInstruments.csv")))
-                //using (StreamReader streamReader = new StreamReader((Stream)File.OpenRead("../../SelectedInstruments.csv"))) // just in case
-                {
-                    while (!streamReader.EndOfStream)
-                    {
-                        string[] strArray = streamReader.ReadLine().Split(',');
-                        stringList.Add(strArray[0].ToString());
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            return stringList;
-        }
         public static List<InstrumentInfo> Instruments()
         {
             List<InstrumentInfo> instrumentInfoList = new List<InstrumentInfo>();
@@ -171,14 +76,93 @@ namespace ConsoleApplication1
             }
             return tseShareInfoList;
         }
-
+        public static List<string> SelectedInstruments()
+        {
+            List<string> stringList = new List<string>();
+            try
+            {
+                using (StreamReader streamReader = new StreamReader((Stream)File.OpenRead(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\TseClient 2.0\\Files\\SelectedInstruments.csv")))
+                //using (StreamReader streamReader = new StreamReader((Stream)File.OpenRead("../../SelectedInstruments.csv"))) // just in case
+                {
+                    while (!streamReader.EndOfStream)
+                    {
+                        string[] strArray = streamReader.ReadLine().Split(',');
+                        stringList.Add(strArray[0].ToString());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return stringList;
+        }
+        public static List<ClosingPriceInfo> ClosingPrices(long insCode)
+        {
+            List<ClosingPriceInfo> closingPriceInfoList = new List<ClosingPriceInfo>();
+            try
+            {
+                if (!File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\TseClient 2.0\\Files\\Instruments\\" + insCode.ToString() + ".csv"))
+                    return closingPriceInfoList;
+                using (StreamReader streamReader = new StreamReader((Stream)File.OpenRead(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\TseClient 2.0\\Files\\Instruments\\" + insCode.ToString() + ".csv")))
+                {
+                    while (!streamReader.EndOfStream)
+                    {
+                        string[] strArray = streamReader.ReadLine().Split(',');
+                        closingPriceInfoList.Add(new ClosingPriceInfo()
+                        {
+                            InsCode = Convert.ToInt64(strArray[0].ToString()),
+                            DEven = Convert.ToInt32(strArray[1].ToString()),
+                            PClosing = Convert.ToDecimal(strArray[2].ToString()),
+                            PDrCotVal = Convert.ToDecimal(strArray[3].ToString()),
+                            ZTotTran = Convert.ToDecimal(strArray[4].ToString()),
+                            QTotTran5J = Convert.ToDecimal(strArray[5].ToString()),
+                            QTotCap = Convert.ToDecimal(strArray[6].ToString()),
+                            PriceMin = Convert.ToDecimal(strArray[7].ToString()),
+                            PriceMax = Convert.ToDecimal(strArray[8].ToString()),
+                            PriceYesterday = Convert.ToDecimal(strArray[9].ToString()),
+                            PriceFirst = Convert.ToDecimal(strArray[10].ToString())
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return closingPriceInfoList;
+        }
+        public static List<ColumnInfo> ColumnsInfo()
+        {
+            List<ColumnInfo> columnInfoList = new List<ColumnInfo>();
+            try
+            {
+                using (StreamReader streamReader = new StreamReader((Stream)File.OpenRead(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\TseClient 2.0\\Files\\Columns.csv")))
+                {
+                    while (!streamReader.EndOfStream)
+                    {
+                        string[] strArray = streamReader.ReadLine().Split(',');
+                        columnInfoList.Add(new ColumnInfo()
+                        {
+                            Index = Convert.ToInt32(strArray[0].ToString()),
+                            Type = (ColumnType)Enum.Parse(typeof(ColumnType), strArray[1].ToString()),
+                            Header = strArray[2].ToString(),
+                            Visible = strArray[3].ToString().Equals("1")
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return columnInfoList;
+        }
         public static int OutputFileLastDeven(InstrumentInfo instrument, int indexOfDate, bool isShamsiDate)
         {
             int num = 0;
             try
             {
-                // ISSUE: object of a compiler-generated type is created
-                // ISSUE: variable of a compiler-generated type
                 Settings settings = new Settings();
                 string str1 = settings.StorageLocation;
                 if (settings.AdjustPricesCondition == 1 || settings.AdjustPricesCondition == 2)
@@ -468,6 +452,21 @@ namespace ConsoleApplication1
                 }
             }
             List<ColumnInfo> columnInfoList = FileService.ColumnsInfo();
+            /* columnInfoList
+            reads ~/Files/Columns.csv
+            returns [
+                { Index: 1, Type: 2,  Header: '<TICKER>',     Visible: 1 },
+                { Index: 2, Type: 4,  Header: '<DTYYYYMMDD>', Visible: 1 },
+                { Index: 3, Type: 6,  Header: '<OPEN>',       Visible: 1 },
+                { Index: 4, Type: 7,  Header: '<HIGH>',       Visible: 1 },
+                { Index: 5, Type: 8,  Header: '<LOW>',        Visible: 1 },
+                { Index: 6, Type: 10, Header: '<CLOSE>',      Visible: 1 },
+                { Index: 7, Type: 12, Header: '<VOL>',        Visible: 1 },
+                {},
+                {},
+            ]
+            
+            */
             Encoding utF8 = Encoding.UTF8;
             Encoding encoding;
             switch (Convert.ToInt32(settings.Encoding))
@@ -501,6 +500,7 @@ namespace ConsoleApplication1
                 string str6 = str5.Substring(0, str5.Length - 1);
                 textWriter.WriteLine(str6);
             }
+            // this is where file is generated
             foreach (ClosingPriceInfo closingPriceInfo in cp)
             {
                 if ((!appendExistingFile || closingPriceInfo.DEven > num) && (settings.ExportDaysWithoutTrade || !(closingPriceInfo.ZTotTran == new Decimal(0))))
@@ -610,18 +610,9 @@ namespace ConsoleApplication1
             textWriter.Flush();
             textWriter.Dispose();
         }
-        public static bool HasAccessToWrite(string path)
+        public static void WriteOutputExcel(InstrumentInfo instrument, List<ClosingPriceInfo> cp)
         {
-            try
-            {
-                using (File.Create(Path.Combine(path, "Access.txt"), 1, FileOptions.DeleteOnClose))
-                    ;
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return;
         }
     }
 }

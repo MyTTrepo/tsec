@@ -31,11 +31,11 @@ namespace ConsoleApplication1
                 }
 
                 int startDeven = 0;
-                settings.StartDate.Replace("/", "").ToString();
+                settings.StartDate.Replace("/", "").ToString(); // bug
                 DateTime dateTime = Utility.ConvertJalaliStringToDateTime(settings.StartDate);
                 startDeven = dateTime.Year * 10000 + dateTime.Month * 100 + dateTime.Day;
                 int num1 = 0;
-                using (List<string>.Enumerator enumerator = StaticData.SelectedInstruments.GetEnumerator()) {
+                using (List<string>.Enumerator enumerator = StaticData.SelectedInstruments.GetEnumerator()) { // for each selected instrument
                     while (enumerator.MoveNext()) {
                         string item = enumerator.Current;
                         List<ClosingPriceInfo> cp = FileService.ClosingPrices(Convert.ToInt64(item));
@@ -62,7 +62,7 @@ namespace ConsoleApplication1
                         ]
                         */
                         cp = cp.FindAll((Predicate<ClosingPriceInfo>)(p => p.DEven >= startDeven));
-                        if ((settings.AdjustPricesCondition == 1 || settings.AdjustPricesCondition == 2) && cp.Count > 1) {
+                        if ((settings.AdjustPricesCondition == 1 || settings.AdjustPricesCondition == 2) && cp.Count > 1) { // adjusting scenarios
                             List<ClosingPriceInfo> closingPriceInfoList = new List<ClosingPriceInfo>();
                             Decimal num2 = new Decimal(1);
                             closingPriceInfoList.Add(cp[cp.Count - 1]);
@@ -110,7 +110,7 @@ namespace ConsoleApplication1
                                 for (int index = closingPriceInfoList.Count - 1; index >= 0; --index)
                                     cp.Add(closingPriceInfoList[index]);
                             }
-                        }
+                        } // end of adjusting scenarios
                         InstrumentInfo instrument = StaticData.Instruments.Find((Predicate<InstrumentInfo>)(p => p.InsCode.ToString().Equals(item)));
                         if (!settings.ExcelOutput)
                             //FileService.WriteOutputFile(instrument, cp, !Program.chkRemoveOldFiles.Checked);
@@ -119,7 +119,7 @@ namespace ConsoleApplication1
                             FileService.WriteOutputExcel(instrument, cp);
                         ++num1;
                     }
-                }
+                } // end of for each selected instrument
                 return true;
             } catch (Exception ex) {
                 var x = ex;
