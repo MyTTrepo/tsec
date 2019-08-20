@@ -429,11 +429,11 @@ namespace ConsoleApplication1
         public static void WriteOutputFile(InstrumentInfo instrument, List<ClosingPriceInfo> cp, bool appendExistingFile)
         {
             Settings settings = new Settings();
-            string str1 = settings.StorageLocation;
+            string storageLocation = settings.StorageLocation;
             if (settings.AdjustPricesCondition == 1 || settings.AdjustPricesCondition == 2)
-                str1 = settings.AdjustedStorageLocation;
-            string str2 = settings.Delimeter.ToString();
-            string str3; // filename
+                storageLocation = settings.AdjustedStorageLocation;
+            string delimiter = settings.Delimeter.ToString();
+            string filename;
 
             /* settings.FileName
             0 Isin کد          
@@ -452,102 +452,102 @@ namespace ConsoleApplication1
             switch (Convert.ToInt32(settings.FileName))
             {
                 case 0:
-                    str3 = instrument.CIsin;
+                    filename = instrument.CIsin;
                     if (instrument.YMarNSC != "ID")
                     {
                         if (settings.AdjustPricesCondition == 1)
                         {
-                            str3 += "-a";
+                            filename += "-a";
                             break;
                         }
                         if (settings.AdjustPricesCondition == 2)
                         {
-                            str3 += "-i";
+                            filename += "-i";
                             break;
                         }
                         break;
                     }
                     break;
                 case 1:
-                    str3 = instrument.LatinName;
+                    filename = instrument.LatinName;
                     if (instrument.YMarNSC != "ID")
                     {
                         if (settings.AdjustPricesCondition == 1)
                         {
-                            str3 += "-a";
+                            filename += "-a";
                             break;
                         }
                         if (settings.AdjustPricesCondition == 2)
                         {
-                            str3 += "-i";
+                            filename += "-i";
                             break;
                         }
                         break;
                     }
                     break;
                 case 2:
-                    str3 = instrument.LatinSymbol;
+                    filename = instrument.LatinSymbol;
                     if (instrument.YMarNSC != "ID")
                     {
                         if (settings.AdjustPricesCondition == 1)
                         {
-                            str3 += "-a";
+                            filename += "-a";
                             break;
                         }
                         if (settings.AdjustPricesCondition == 2)
                         {
-                            str3 += "-i";
+                            filename += "-i";
                             break;
                         }
                         break;
                     }
                     break;
                 case 3:
-                    str3 = instrument.Name;
+                    filename = instrument.Name;
                     if (instrument.YMarNSC != "ID")
                     {
                         if (settings.AdjustPricesCondition == 1)
                         {
-                            str3 += "-ت";
+                            filename += "-ت";
                             break;
                         }
                         if (settings.AdjustPricesCondition == 2)
                         {
-                            str3 += "-ا";
+                            filename += "-ا";
                             break;
                         }
                         break;
                     }
                     break;
                 case 4:
-                    str3 = instrument.Symbol;
+                    filename = instrument.Symbol;
                     if (instrument.YMarNSC != "ID")
                     {
                         if (settings.AdjustPricesCondition == 1)
                         {
-                            str3 += "-ت";
+                            filename += "-ت";
                             break;
                         }
                         if (settings.AdjustPricesCondition == 2)
                         {
-                            str3 += "-ا";
+                            filename += "-ا";
                             break;
                         }
                         break;
                     }
                     break;
                 default:
-                    str3 = instrument.CIsin;
+                    filename = instrument.CIsin;
                     if (instrument.YMarNSC != "ID")
                     {
                         if (settings.AdjustPricesCondition == 1)
                         {
-                            str3 += "-a";
+                            filename += "-a";
                             break;
                         }
                         if (settings.AdjustPricesCondition == 2)
                         {
-                            str3 += "-i";
+                            filename += "-i";
                             break;
                         }
                         break;
@@ -556,13 +556,11 @@ namespace ConsoleApplication1
             }
             // replace(char, with)
             // replaces invalid chars for windows file names in the settings.filename (set by user in settings panel)
-            string str4 = str3.Replace('\\', ' ').Replace('/', ' ').Replace('*', ' ').Replace(':', ' ').Replace('>', ' ').Replace('<', ' ').Replace('?', ' ').Replace('|', ' ').Replace('^', ' ').Replace('"', ' ');
+            filename = filename.Replace('\\', ' ').Replace('/', ' ').Replace('*', ' ').Replace(':', ' ').Replace('>', ' ').Replace('<', ' ').Replace('?', ' ').Replace('|', ' ').Replace('^', ' ').Replace('"', ' ');
             int num = 0;
-            // str1 storageLocation
-            // str4 filename
             if (appendExistingFile)
             {
-                if (!File.Exists(str1 + "\\" + str4 + "." + settings.FileExtension))
+                if (!File.Exists(storageLocation + "\\" + filename + "." + settings.FileExtension))
                 {
                     appendExistingFile = false;
                 }
@@ -620,20 +618,20 @@ namespace ConsoleApplication1
                     encoding = Encoding.UTF8;
                     break;
             }
-            TextWriter textWriter = (TextWriter)new StreamWriter(str1 + "\\" + str4 + "." + settings.FileExtension, appendExistingFile, encoding);
+            TextWriter textWriter = (TextWriter)new StreamWriter(storageLocation + "\\" + filename + "." + settings.FileExtension, appendExistingFile, encoding);
             columnInfoList.Sort((Comparison<ColumnInfo>)((s1, s2) => s1.Index.CompareTo(s2.Index)));
-            string str5 = "";
+            string headerRow = "";
             if (settings.ShowHeaders && num == 0)
             {
                 foreach (ColumnInfo columnInfo in columnInfoList)
                 {
                     if (columnInfo.Visible)
                     {
-                        str5 += columnInfo.Header;
-                        str5 += str2;
+                        headerRow += columnInfo.Header;
+                        headerRow += delimiter;
                     }
                 }
-                string str6 = str5.Substring(0, str5.Length - 1);
+                string str6 = headerRow.Substring(0, headerRow.Length - 1);
                 textWriter.WriteLine(str6);
             }
             // this is where file is generated
@@ -736,7 +734,7 @@ namespace ConsoleApplication1
                                     str6 += closingPriceInfo.PriceYesterday.ToString();
                                     break;
                             }
-                            str6 += str2;
+                            str6 += delimiter;
                         }
                     }
                     string str7 = str6.Substring(0, str6.Length - 1);

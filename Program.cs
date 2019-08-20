@@ -11,7 +11,7 @@ namespace ConsoleApplication1
         {
             StaticData.FillStaticData();
 
-            UCStepUpdate.UpdateClosingPrices();
+            //UCStepUpdate.UpdateClosingPrices();
 
             Program.GnerateFiles();
         
