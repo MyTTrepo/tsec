@@ -9,6 +9,26 @@ namespace ConsoleApplication1
 {
     class FileService
     {
+        public static int LastDeven(string insCode)
+        {
+            int num = 0;
+            try
+            {
+                if (!File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\TseClient 2.0\\Files\\Instruments\\" + insCode + ".csv"))
+                    return 0;
+                using (StreamReader streamReader = new StreamReader((Stream)File.OpenRead(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\TseClient 2.0\\Files\\Instruments\\" + insCode + ".csv")))
+                {
+                    string str = "";
+                    while (!streamReader.EndOfStream)
+                        str = streamReader.ReadLine();
+                    num = Convert.ToInt32(str.Split(',')[1].ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+            return num;
+        }
         public static List<InstrumentInfo> Instruments()
         {
             List<InstrumentInfo> instrumentInfoList = new List<InstrumentInfo>();
@@ -157,6 +177,122 @@ namespace ConsoleApplication1
                 throw ex;
             }
             return columnInfoList;
+        }
+        public static void WriteInstruments()
+        {
+            using (TextWriter text = (TextWriter)File.CreateText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\TseClient 2.0\\Files\\Instruments.csv"))
+            {
+                foreach (InstrumentInfo instrument in StaticData.Instruments)
+                {
+                    text.Write(instrument.InsCode);
+                    text.Write(',');
+                    text.Write(instrument.InstrumentID);
+                    text.Write(',');
+                    text.Write(instrument.LatinSymbol);
+                    text.Write(',');
+                    text.Write(instrument.LatinName);
+                    text.Write(',');
+                    text.Write(instrument.CompanyCode);
+                    text.Write(',');
+                    text.Write(instrument.Symbol);
+                    text.Write(',');
+                    text.Write(instrument.Name);
+                    text.Write(',');
+                    text.Write(instrument.CIsin);
+                    text.Write(',');
+                    text.Write(instrument.DEven);
+                    text.Write(',');
+                    text.Write((int)instrument.Flow);
+                    text.Write(',');
+                    text.Write(instrument.LSoc30);
+                    text.Write(',');
+                    text.Write(instrument.CGdSVal);
+                    text.Write(',');
+                    text.Write(instrument.CGrValCot);
+                    text.Write(',');
+                    text.Write(instrument.YMarNSC);
+                    text.Write(',');
+                    text.Write(instrument.CComVal);
+                    text.Write(',');
+                    text.Write(instrument.CSecVal);
+                    text.Write(',');
+                    text.Write(instrument.CSoSecVal);
+                    text.Write(',');
+                    text.Write(instrument.YVal);
+                    text.Write('\n');
+                }
+                text.Flush();
+            }
+        }
+        public static void WriteTseShares()
+        {
+            using (TextWriter text = (TextWriter)File.CreateText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\TseClient 2.0\\Files\\TseShares.csv"))
+            {
+                foreach (TseShareInfo tseShare in StaticData.TseShares)
+                {
+                    text.Write(tseShare.Idn);
+                    text.Write(',');
+                    text.Write(tseShare.InsCode);
+                    text.Write(',');
+                    text.Write(tseShare.DEven);
+                    text.Write(',');
+                    text.Write(tseShare.NumberOfShareNew);
+                    text.Write(',');
+                    text.Write(tseShare.NumberOfShareOld);
+                    text.Write('\n');
+                }
+                text.Flush();
+            }
+        }
+        public static void WriteClosingPrices(List<ClosingPriceInfo> input)
+        {
+            if (input.Count == 0)
+                return;
+            string str = input[0].InsCode.ToString();
+            List<ClosingPriceInfo> closingPriceInfoList1 = new List<ClosingPriceInfo>();
+            List<ClosingPriceInfo> closingPriceInfoList2 = new List<ClosingPriceInfo>(); // same as input[0]
+            List<ClosingPriceInfo> closingPriceInfoList3 = FileService.ClosingPrices(Convert.ToInt64(str)); // get previous closing prices of currently processing instrument
+            foreach (ClosingPriceInfo closingPriceInfo in input)
+                closingPriceInfoList2.Add(closingPriceInfo);
+            using (List<ClosingPriceInfo>.Enumerator enumerator = closingPriceInfoList3.GetEnumerator()) // go through previous prices
+            {
+                while (enumerator.MoveNext())
+                {
+                    ClosingPriceInfo item = enumerator.Current;
+                    if (closingPriceInfoList2.Find( (Predicate<ClosingPriceInfo>)(p => p.DEven == item.DEven) ) == null)
+                        closingPriceInfoList2.Add(item);
+                }
+            }
+            closingPriceInfoList2.Sort((Comparison<ClosingPriceInfo>)((s1, s2) => s1.DEven.CompareTo(s2.DEven)));
+            using (TextWriter text = (TextWriter)File.CreateText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\TseClient 2.0\\Files\\Instruments\\" + str + ".csv"))
+            {
+                foreach (ClosingPriceInfo closingPriceInfo in closingPriceInfoList2)
+                {
+                    text.Write(closingPriceInfo.InsCode);
+                    text.Write(',');
+                    text.Write(closingPriceInfo.DEven);
+                    text.Write(',');
+                    text.Write(closingPriceInfo.PClosing);
+                    text.Write(',');
+                    text.Write(closingPriceInfo.PDrCotVal);
+                    text.Write(',');
+                    text.Write(closingPriceInfo.ZTotTran);
+                    text.Write(',');
+                    text.Write(closingPriceInfo.QTotTran5J);
+                    text.Write(',');
+                    text.Write(closingPriceInfo.QTotCap);
+                    text.Write(',');
+                    text.Write(closingPriceInfo.PriceMin);
+                    text.Write(',');
+                    text.Write(closingPriceInfo.PriceMax);
+                    text.Write(',');
+                    text.Write(closingPriceInfo.PriceYesterday);
+                    text.Write(',');
+                    text.Write(closingPriceInfo.PriceFirst);
+                    text.Write('\n');
+                }
+                text.Flush();
+            }
         }
         public static int OutputFileLastDeven(InstrumentInfo instrument, int indexOfDate, bool isShamsiDate)
         {
@@ -613,6 +749,35 @@ namespace ConsoleApplication1
         public static void WriteOutputExcel(InstrumentInfo instrument, List<ClosingPriceInfo> cp)
         {
             return;
+        }
+        public static string ReadVersionFileContent()
+        {
+            string str = "";
+            try
+            {
+                using (StreamReader streamReader = new StreamReader((Stream)File.OpenRead(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\TseClient 2.0\\Files\\Version.txt")))
+                    str = streamReader.ReadToEnd();
+            }
+            catch (Exception ex)
+            {
+            }
+            return str;
+        }
+        public static void WriteVersionFileContent(string version)
+        {
+            using (TextWriter text = (TextWriter)File.CreateText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\TseClient 2.0\\Files\\Version.txt"))
+            {
+                text.Write(version);
+                text.Flush();
+            }
+        }
+        public static void EraseCurrentFiles()
+        {
+            foreach (FileSystemInfo file in new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\TseClient 2.0\\Files\\Instruments").GetFiles())
+                file.Delete();
+            FileInfo fileInfo = new FileInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\TseClient 2.0\\Files\\Instruments.csv");
+            fileInfo.Delete();
+            fileInfo.Create();
         }
     }
 }

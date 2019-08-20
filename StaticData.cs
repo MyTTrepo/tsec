@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,6 +15,7 @@ namespace ConsoleApplication1
         public static List<InstrumentInfo> Instruments;
         public static List<string> SelectedInstruments;
         public static List<TseShareInfo> TseShares;
+        public static string Version;
 
         public static void FillStaticData()
         {
@@ -22,6 +25,7 @@ namespace ConsoleApplication1
             StaticData.Instruments = FileService.Instruments();
             StaticData.TseShares = FileService.TseShares();
             StaticData.SelectedInstruments = FileService.SelectedInstruments();
+            StaticData.Version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
         }
     }
 }
