@@ -557,7 +557,7 @@ namespace ConsoleApplication1
             // replace(char, with)
             // replaces invalid chars for windows file names in the settings.filename (set by user in settings panel)
             filename = filename.Replace('\\', ' ').Replace('/', ' ').Replace('*', ' ').Replace(':', ' ').Replace('>', ' ').Replace('<', ' ').Replace('?', ' ').Replace('|', ' ').Replace('^', ' ').Replace('"', ' ');
-            int num = 0;
+            int outputFileLastDeven = 0;
             if (appendExistingFile)
             {
                 if (!File.Exists(storageLocation + "\\" + filename + "." + settings.FileExtension))
@@ -582,7 +582,7 @@ namespace ConsoleApplication1
                             isShamsiDate = true;
                         }
                     }
-                    num = FileService.OutputFileLastDeven(instrument, indexOfDate, isShamsiDate);
+                    outputFileLastDeven = FileService.OutputFileLastDeven(instrument, indexOfDate, isShamsiDate);
                 }
             }
             List<ColumnInfo> columnInfoList = FileService.ColumnsInfo();
@@ -619,9 +619,9 @@ namespace ConsoleApplication1
                     break;
             }
             TextWriter textWriter = (TextWriter)new StreamWriter(storageLocation + "\\" + filename + "." + settings.FileExtension, appendExistingFile, encoding);
-            columnInfoList.Sort((Comparison<ColumnInfo>)((s1, s2) => s1.Index.CompareTo(s2.Index)));
+            columnInfoList.Sort((Comparison<ColumnInfo>)((s1, s2) => s1.Index.CompareTo(s2.Index))); // sort by index I think
             string headerRow = "";
-            if (settings.ShowHeaders && num == 0)
+            if (settings.ShowHeaders && outputFileLastDeven == 0)
             {
                 foreach (ColumnInfo columnInfo in columnInfoList)
                 {
@@ -637,7 +637,7 @@ namespace ConsoleApplication1
             // this is where file is generated
             foreach (ClosingPriceInfo closingPriceInfo in cp)
             {
-                if ((!appendExistingFile || closingPriceInfo.DEven > num) && (settings.ExportDaysWithoutTrade || !(closingPriceInfo.ZTotTran == new Decimal(0))))
+                if ((!appendExistingFile || closingPriceInfo.DEven > outputFileLastDeven) && (settings.ExportDaysWithoutTrade || !(closingPriceInfo.ZTotTran == new Decimal(0))))
                 {
                     string str6 = "";
                     foreach (ColumnInfo columnInfo in columnInfoList)

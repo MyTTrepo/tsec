@@ -14,7 +14,7 @@ namespace ConsoleApplication1
             //UCStepUpdate.UpdateClosingPrices();
 
             Program.GnerateFiles();
-        
+
             Console.ReadLine();
         }
 
@@ -32,11 +32,9 @@ namespace ConsoleApplication1
                     return false;
                 }
 
-                int startDeven = 0;
-                settings.StartDate.Replace("/", "").ToString(); // bug
+                //settings.StartDate = settings.StartDate.Replace("/", "").ToString(); // bug
                 DateTime dateTime = Utility.ConvertJalaliStringToDateTime(settings.StartDate);
-                startDeven = dateTime.Year * 10000 + dateTime.Month * 100 + dateTime.Day;
-                int num1 = 0;
+                int startDeven = dateTime.Year * 10000 + dateTime.Month * 100 + dateTime.Day;
                 using (List<string>.Enumerator enumerator = StaticData.SelectedInstruments.GetEnumerator()) { // for each selected instrument
                     while (enumerator.MoveNext()) {
                         string item = enumerator.Current;
@@ -119,7 +117,6 @@ namespace ConsoleApplication1
                             FileService.WriteOutputFile(instrument, cp, false);
                         else
                             FileService.WriteOutputExcel(instrument, cp);
-                        ++num1;
                     }
                 } // end of for each selected instrument
                 return true;
