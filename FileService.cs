@@ -601,7 +601,7 @@ namespace ConsoleApplication1
             ]
             
             */
-            Encoding utF8 = Encoding.UTF8;
+            //Encoding utF8 = Encoding.UTF8; // unnecessary
             Encoding encoding;
             switch (Convert.ToInt32(settings.Encoding))
             {
