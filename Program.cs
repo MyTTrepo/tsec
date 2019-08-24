@@ -25,6 +25,7 @@ namespace ConsoleApplication1
         {
             try {
                 Settings settings = new Settings();
+                settings.AdjustPricesCondition = 1;
                 //string path = settings.AdjustPricesCondition != 0 ? settings.AdjustedStorageLocation : settings.StorageLocation;
                 string path = "./";
                 if ((string.IsNullOrEmpty(path) || !Directory.Exists(path))) { // && this.isVisual
@@ -32,7 +33,7 @@ namespace ConsoleApplication1
                     return false;
                 }
 
-                //settings.StartDate = settings.StartDate.Replace("/", "").ToString(); // bug
+                //settings.StartDate = settings.StartDate.Replace("/", "").ToString(); // unnecessary
                 DateTime dateTime = Utility.ConvertJalaliStringToDateTime(settings.StartDate);
                 int startDeven = dateTime.Year * 10000 + dateTime.Month * 100 + dateTime.Day;
                 using (List<string>.Enumerator enumerator = StaticData.SelectedInstruments.GetEnumerator()) { // for each selected instrument

@@ -294,6 +294,48 @@ namespace ConsoleApplication1
                 text.Flush();
             }
         }
+        public static string GetSuffix(string YMarNSC, int AdjustPricesCondition, bool fa=false)
+        {
+            string suffx = "";
+            if (YMarNSC != "ID")
+            {
+                if (AdjustPricesCondition == 1)
+                {
+                    suffx = fa ? "-ت" : "-a";
+                }
+                else if (AdjustPricesCondition == 2)
+                {
+                    suffx = fa ? "-ا" : "-i";
+                }
+            }
+            return suffx;
+        }
+        public static string GetFileName(InstrumentInfo instrument, string filenameType, int AdjustPricesCondition) {
+            string YMarNSC = instrument.YMarNSC;
+            string filename = "";
+            switch (Convert.ToInt32(filenameType))
+            {
+                case 0:
+                    filename = instrument.CIsin + FileService.GetSuffix(YMarNSC, AdjustPricesCondition);
+                    break;
+                case 1:
+                    filename = instrument.LatinName + FileService.GetSuffix(YMarNSC, AdjustPricesCondition);
+                    break;
+                case 2:
+                    filename = instrument.LatinSymbol + FileService.GetSuffix(YMarNSC, AdjustPricesCondition);
+                    break;
+                case 3:
+                    filename = instrument.Name + FileService.GetSuffix(YMarNSC, AdjustPricesCondition, true);
+                    break;
+                case 4:
+                    filename = instrument.Symbol + FileService.GetSuffix(YMarNSC, AdjustPricesCondition, true);
+                    break;
+                default:
+                    filename = instrument.CIsin + FileService.GetSuffix(YMarNSC, AdjustPricesCondition);
+                    break;
+            }
+            return filename;
+        }
         public static int OutputFileLastDeven(InstrumentInfo instrument, int indexOfDate, bool isShamsiDate)
         {
             int num = 0;
@@ -303,112 +345,7 @@ namespace ConsoleApplication1
                 string str1 = settings.StorageLocation;
                 if (settings.AdjustPricesCondition == 1 || settings.AdjustPricesCondition == 2)
                     str1 = settings.AdjustedStorageLocation;
-                string str2;
-                switch (Convert.ToInt32(settings.FileName))
-                {
-                    case 0:
-                        str2 = instrument.CIsin;
-                        if (instrument.YMarNSC != "ID")
-                        {
-                            if (settings.AdjustPricesCondition == 1)
-                            {
-                                str2 += "-a";
-                                break;
-                            }
-                            if (settings.AdjustPricesCondition == 2)
-                            {
-                                str2 += "-i";
-                                break;
-                            }
-                            break;
-                        }
-                        break;
-                    case 1:
-                        str2 = instrument.LatinName;
-                        if (instrument.YMarNSC != "ID")
-                        {
-                            if (settings.AdjustPricesCondition == 1)
-                            {
-                                str2 += "-a";
-                                break;
-                            }
-                            if (settings.AdjustPricesCondition == 2)
-                            {
-                                str2 += "-i";
-                                break;
-                            }
-                            break;
-                        }
-                        break;
-                    case 2:
-                        str2 = instrument.LatinSymbol;
-                        if (instrument.YMarNSC != "ID")
-                        {
-                            if (settings.AdjustPricesCondition == 1)
-                            {
-                                str2 += "-a";
-                                break;
-                            }
-                            if (settings.AdjustPricesCondition == 2)
-                            {
-                                str2 += "-i";
-                                break;
-                            }
-                            break;
-                        }
-                        break;
-                    case 3:
-                        str2 = instrument.Name;
-                        if (instrument.YMarNSC != "ID")
-                        {
-                            if (settings.AdjustPricesCondition == 1)
-                            {
-                                str2 += "-ت";
-                                break;
-                            }
-                            if (settings.AdjustPricesCondition == 2)
-                            {
-                                str2 += "-ا";
-                                break;
-                            }
-                            break;
-                        }
-                        break;
-                    case 4:
-                        str2 = instrument.Symbol;
-                        if (instrument.YMarNSC != "ID")
-                        {
-                            if (settings.AdjustPricesCondition == 1)
-                            {
-                                str2 += "-ت";
-                                break;
-                            }
-                            if (settings.AdjustPricesCondition == 2)
-                            {
-                                str2 += "-ا";
-                                break;
-                            }
-                            break;
-                        }
-                        break;
-                    default:
-                        str2 = instrument.CIsin;
-                        if (instrument.YMarNSC != "ID")
-                        {
-                            if (settings.AdjustPricesCondition == 1)
-                            {
-                                str2 += "-a";
-                                break;
-                            }
-                            if (settings.AdjustPricesCondition == 2)
-                            {
-                                str2 += "-i";
-                                break;
-                            }
-                            break;
-                        }
-                        break;
-                }
+                string str2 = FileService.GetFileName(instrument, settings.FileName, settings.AdjustPricesCondition);
                 string str3 = str2.Replace('\\', ' ').Replace('/', ' ').Replace('*', ' ').Replace(':', ' ').Replace('>', ' ').Replace('<', ' ').Replace('?', ' ').Replace('|', ' ').Replace('^', ' ').Replace('"', ' ');
                 if (!File.Exists(str1 + "\\" + str3 + "." + settings.FileExtension))
                     return 0;
@@ -433,127 +370,7 @@ namespace ConsoleApplication1
             if (settings.AdjustPricesCondition == 1 || settings.AdjustPricesCondition == 2)
                 storageLocation = settings.AdjustedStorageLocation;
             string delimiter = settings.Delimeter.ToString();
-            string filename;
-
-            /* settings.FileName
-            0 Isin کد          
-            1 نام لاتین        
-            2 نماد لاتین       
-            3 نام
-            4 نماد
-            default: 0
-
-            "IRO1SIPA0001"
-            "Saipa"
-            "SIPA1"
-            "سايپا"
-            "خساپا"
-            */
-            switch (Convert.ToInt32(settings.FileName))
-            {
-                case 0:
-                    filename = instrument.CIsin;
-                    if (instrument.YMarNSC != "ID")
-                    {
-                        if (settings.AdjustPricesCondition == 1)
-                        {
-                            filename += "-a";
-                            break;
-                        }
-                        if (settings.AdjustPricesCondition == 2)
-                        {
-                            filename += "-i";
-                            break;
-                        }
-                        break;
-                    }
-                    break;
-                case 1:
-                    filename = instrument.LatinName;
-                    if (instrument.YMarNSC != "ID")
-                    {
-                        if (settings.AdjustPricesCondition == 1)
-                        {
-                            filename += "-a";
-                            break;
-                        }
-                        if (settings.AdjustPricesCondition == 2)
-                        {
-                            filename += "-i";
-                            break;
-                        }
-                        break;
-                    }
-                    break;
-                case 2:
-                    filename = instrument.LatinSymbol;
-                    if (instrument.YMarNSC != "ID")
-                    {
-                        if (settings.AdjustPricesCondition == 1)
-                        {
-                            filename += "-a";
-                            break;
-                        }
-                        if (settings.AdjustPricesCondition == 2)
-                        {
-                            filename += "-i";
-                            break;
-                        }
-                        break;
-                    }
-                    break;
-                case 3:
-                    filename = instrument.Name;
-                    if (instrument.YMarNSC != "ID")
-                    {
-                        if (settings.AdjustPricesCondition == 1)
-                        {
-                            filename += "-ت";
-                            break;
-                        }
-                        if (settings.AdjustPricesCondition == 2)
-                        {
-                            filename += "-ا";
-                            break;
-                        }
-                        break;
-                    }
-                    break;
-                case 4:
-                    filename = instrument.Symbol;
-                    if (instrument.YMarNSC != "ID")
-                    {
-                        if (settings.AdjustPricesCondition == 1)
-                        {
-                            filename += "-ت";
-                            break;
-                        }
-                        if (settings.AdjustPricesCondition == 2)
-                        {
-                            filename += "-ا";
-                            break;
-                        }
-                        break;
-                    }
-                    break;
-                default:
-                    filename = instrument.CIsin;
-                    if (instrument.YMarNSC != "ID")
-                    {
-                        if (settings.AdjustPricesCondition == 1)
-                        {
-                            filename += "-a";
-                            break;
-                        }
-                        if (settings.AdjustPricesCondition == 2)
-                        {
-                            filename += "-i";
-                            break;
-                        }
-                        break;
-                    }
-                    break;
-            }
+            string filename = FileService.GetFileName(instrument, settings.FileName, settings.AdjustPricesCondition);
             // replace(char, with)
             // replaces invalid chars for windows file names in the settings.filename (set by user in settings panel)
             filename = filename.Replace('\\', ' ').Replace('/', ' ').Replace('*', ' ').Replace(':', ' ').Replace('>', ' ').Replace('<', ' ').Replace('?', ' ').Replace('|', ' ').Replace('^', ' ').Replace('"', ' ');
@@ -586,21 +403,6 @@ namespace ConsoleApplication1
                 }
             }
             List<ColumnInfo> columnInfoList = FileService.ColumnsInfo();
-            /* columnInfoList
-            reads ~/Files/Columns.csv
-            returns [
-                { Index: 1, Type: 2,  Header: '<TICKER>',     Visible: 1 },
-                { Index: 2, Type: 4,  Header: '<DTYYYYMMDD>', Visible: 1 },
-                { Index: 3, Type: 6,  Header: '<OPEN>',       Visible: 1 },
-                { Index: 4, Type: 7,  Header: '<HIGH>',       Visible: 1 },
-                { Index: 5, Type: 8,  Header: '<LOW>',        Visible: 1 },
-                { Index: 6, Type: 10, Header: '<CLOSE>',      Visible: 1 },
-                { Index: 7, Type: 12, Header: '<VOL>',        Visible: 1 },
-                {},
-                {},
-            ]
-            
-            */
             //Encoding utF8 = Encoding.UTF8; // unnecessary
             Encoding encoding;
             switch (Convert.ToInt32(settings.Encoding))
