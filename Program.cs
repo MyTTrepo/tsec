@@ -25,9 +25,9 @@ namespace ConsoleApplication1
         {
             try {
                 Settings settings = new Settings();
-                settings.AdjustPricesCondition = 1;
+                settings.AdjustPricesCondition = 1; // me
                 //string path = settings.AdjustPricesCondition != 0 ? settings.AdjustedStorageLocation : settings.StorageLocation;
-                string path = "./";
+                string path = "./"; // me
                 if ((string.IsNullOrEmpty(path) || !Directory.Exists(path))) { // && this.isVisual
                     Console.WriteLine("\n\tمقدار فیلد محل ذخیره فایل ها صحیح نمی باشد ");
                     return false;
@@ -38,61 +38,47 @@ namespace ConsoleApplication1
                 int startDeven = dateTime.Year * 10000 + dateTime.Month * 100 + dateTime.Day;
                 using (List<string>.Enumerator enumerator = StaticData.SelectedInstruments.GetEnumerator()) { // for each selected instrument
                     while (enumerator.MoveNext()) {
-                        string item = enumerator.Current;
-                        List<ClosingPriceInfo> cp = FileService.ClosingPrices(Convert.ToInt64(item));
-                        /* cp
-                        FileService.ClosingPrices() reads from ~/Files/<item>.csv
-                        returns an array, each item being a row in that csv file
-                        each item is a closingPriceInfoList
-                        [
-                            {
-                                InsCode: '',
-		                        DEven: '',
-		                        PClosing: '',
-		                        PDrCotVal: '',
-		                        ZTotTran: '',
-		                        QTotTran5J: '',
-		                        QTotCap: '',
-		                        PriceMin: '',
-		                        PriceMax: '',
-		                        PriceYesterday: '',
-		                        PriceFirst: ''
-                            },
-                            {},
-                            {}
-                        ]
-                        */
+                        string currentItemInscode = enumerator.Current;
+                        List<ClosingPriceInfo> cp = FileService.ClosingPrices(Convert.ToInt64(currentItemInscode)); // all closing prices of a selected instrument
                         cp = cp.FindAll((Predicate<ClosingPriceInfo>)(p => p.DEven >= startDeven));
-                        if ((settings.AdjustPricesCondition == 1 || settings.AdjustPricesCondition == 2) && cp.Count > 1) { // adjusting scenarios
+                        if ((settings.AdjustPricesCondition == 1 || settings.AdjustPricesCondition == 2) && cp.Count > 1) { // for both adjust conds
                             List<ClosingPriceInfo> closingPriceInfoList = new List<ClosingPriceInfo>();
                             Decimal num2 = new Decimal(1);
                             closingPriceInfoList.Add(cp[cp.Count - 1]);
-                            double num3 = 0.0;
-                            if (settings.AdjustPricesCondition == 1) {
-                                for (int index = cp.Count - 2; index >= 0; --index) {
-                                    if (cp[index].PClosing != cp[index + 1].PriceYesterday)
-                                        ++num3;
+                            double gaps = 0.0; // number of price gaps happened in whole history (capital-increase, dividends, intrument open-closes, etc)
+                            if (settings.AdjustPricesCondition == 1) { // cond 1
+                                for (int index = cp.Count - 2; index >= 0; --index) { // for each cp (2ndlast to first)
+                                    if (cp[index].PClosing != cp[index + 1].PriceYesterday) {
+                                        ++gaps;
+                                    }
                                 }
+                                // above for loop detects capital increases, dividends or any kind of price gaps
+                                // formula: if closing price of previous day is not equal to today's yesterday-price
                             }
-                            if (settings.AdjustPricesCondition == 1 &&
-                                num3 / (double)cp.Count < 0.08 || settings.AdjustPricesCondition == 2) {
-                                for (int i = cp.Count - 2; i >= 0; --i) {
-                                    if (settings.AdjustPricesCondition == 1 &&
-                                            cp[i].PClosing != cp[i + 1].PriceYesterday) num2 = num2 * cp[i + 1].PriceYesterday / cp[i].PClosing;
-                                    else if (settings.AdjustPricesCondition == 2 &&
+                            // (gaps / cp.Count) = I don't understand this yet.
+                            if (settings.AdjustPricesCondition == 1 && (gaps / cp.Count < 0.08 || settings.AdjustPricesCondition == 2)) { // cond 2 (kinda)
+                                for (int i = cp.Count - 2; i >= 0; --i) { // for each cp (2ndlast to first)
+                                    if (settings.AdjustPricesCondition == 1 && cp[i].PClosing != cp[i + 1].PriceYesterday) {
+                                        num2 = num2 * cp[i + 1].PriceYesterday / cp[i].PClosing;
+                                    }
+                                    else if (
+                                        settings.AdjustPricesCondition == 2 &&
                                         cp[i].PClosing != cp[i + 1].PriceYesterday &&
                                         StaticData.TseShares.Exists((Predicate<TseShareInfo>)(p => {
-                                            if (p.InsCode.ToString().Equals(item)) return p.DEven == cp[i + 1].DEven;
+                                            if (p.InsCode.ToString().Equals(currentItemInscode)) return p.DEven == cp[i + 1].DEven;
                                             return false;
-                                        })))
+                                        }))
+                                    ) { // do:
                                         num2 *= StaticData.TseShares.Find((Predicate<TseShareInfo>)(p => {
-                                            if (p.InsCode.ToString().Equals(item)) return p.DEven == cp[i + 1].DEven;
+                                            if (p.InsCode.ToString().Equals(currentItemInscode)) return p.DEven == cp[i + 1].DEven;
                                             return false;
                                         })).NumberOfShareOld / StaticData.TseShares.Find((Predicate<TseShareInfo>)(p => {
-                                            if (p.InsCode.ToString().Equals(item))
+                                            if (p.InsCode.ToString().Equals(currentItemInscode))
                                                 return p.DEven == cp[i + 1].DEven;
                                             return false;
                                         })).NumberOfShareNew;
+                                    }
+
                                     closingPriceInfoList.Add(new ClosingPriceInfo() {
                                         InsCode = cp[i].InsCode,
                                         DEven = cp[i].DEven,
@@ -112,7 +98,7 @@ namespace ConsoleApplication1
                                     cp.Add(closingPriceInfoList[index]);
                             }
                         } // end of adjusting scenarios
-                        InstrumentInfo instrument = StaticData.Instruments.Find((Predicate<InstrumentInfo>)(p => p.InsCode.ToString().Equals(item)));
+                        InstrumentInfo instrument = StaticData.Instruments.Find((Predicate<InstrumentInfo>)(p => p.InsCode.ToString().Equals(currentItemInscode)));
                         if (!settings.ExcelOutput)
                             //FileService.WriteOutputFile(instrument, cp, !Program.chkRemoveOldFiles.Checked);
                             FileService.WriteOutputFile(instrument, cp, false);
