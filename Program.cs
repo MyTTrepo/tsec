@@ -58,10 +58,9 @@ namespace ConsoleApplication1
                             // (gaps / cp.Count) = I don't understand this yet.
                             if (settings.AdjustPricesCondition == 1 && (gaps / cp.Count < 0.08 || settings.AdjustPricesCondition == 2)) { // cond 2 (kinda)
                                 for (int i = cp.Count - 2; i >= 0; --i) { // for each cp (2ndlast to first)
-                                    if (settings.AdjustPricesCondition == 1 && cp[i].PClosing != cp[i + 1].PriceYesterday) {
-                                        num2 = num2 * cp[i + 1].PriceYesterday / cp[i].PClosing;
-                                    }
-                                    else if (
+                                    if (settings.AdjustPricesCondition == 1 && cp[i].PClosing != cp[i + 1].PriceYesterday) { // if found gap
+                                        num2 = num2 * cp[i + 1].PriceYesterday / cp[i].PClosing; // divide tomorrow's PriceYesterday by today's PClosing
+                                    } else if (
                                         settings.AdjustPricesCondition == 2 &&
                                         cp[i].PClosing != cp[i + 1].PriceYesterday &&
                                         StaticData.TseShares.Exists((Predicate<TseShareInfo>)(p => {
