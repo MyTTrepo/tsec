@@ -68,14 +68,15 @@ namespace ConsoleApplication1
                                             return false;
                                         }))
                                     ) { // do:
-                                        num2 *= StaticData.TseShares.Find((Predicate<TseShareInfo>)(p => {
-                                            if (p.InsCode.ToString().Equals(currentItemInscode)) return p.DEven == cp[i + 1].DEven;
-                                            return false;
-                                        })).NumberOfShareOld / StaticData.TseShares.Find((Predicate<TseShareInfo>)(p => {
-                                            if (p.InsCode.ToString().Equals(currentItemInscode))
+                                        var something = StaticData.TseShares.Find((Predicate<TseShareInfo>)(p => {
+                                            if (p.InsCode.ToString().Equals(currentItemInscode)) {
                                                 return p.DEven == cp[i + 1].DEven;
+                                            }
                                             return false;
-                                        })).NumberOfShareNew;
+                                        }));
+                                        decimal oldShares = something.NumberOfShareOld;
+                                        decimal newShares = something.NumberOfShareNew;
+                                        num2 = (num2 * oldShares) / newShares;
                                     }
 
                                     closingPriceInfoList.Add(new ClosingPriceInfo() {
