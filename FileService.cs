@@ -360,6 +360,7 @@ namespace ConsoleApplication1
             }
             catch (Exception ex)
             {
+                throw ex;
             }
             return num;
         }
@@ -433,10 +434,12 @@ namespace ConsoleApplication1
                         headerRow += delimiter;
                     }
                 }
-                string str6 = headerRow.Substring(0, headerRow.Length - 1);
-                textWriter.WriteLine(str6);
+                headerRow = headerRow.Substring(0, headerRow.Length - 1);
+                textWriter.WriteLine(headerRow);
             }
             // this is where file is generated
+            string YMarNSC = instrument.YMarNSC;
+            int AdjustPricesCondition = settings.AdjustPricesCondition;
             foreach (ClosingPriceInfo closingPriceInfo in cp)
             {
                 if ((!appendExistingFile || closingPriceInfo.DEven > outputFileLastDeven) && (settings.ExportDaysWithoutTrade || !(closingPriceInfo.ZTotTran == new Decimal(0))))
@@ -452,55 +455,13 @@ namespace ConsoleApplication1
                                     str6 += instrument.CompanyCode.ToString();
                                     break;
                                 case ColumnType.LatinName:
-                                    str6 += instrument.LatinName.ToString();
-                                    if (instrument.YMarNSC != "ID")
-                                    {
-                                        if (settings.AdjustPricesCondition == 1)
-                                        {
-                                            str6 += "-a";
-                                            break;
-                                        }
-                                        if (settings.AdjustPricesCondition == 2)
-                                        {
-                                            str6 += "-i";
-                                            break;
-                                        }
-                                        break;
-                                    }
+                                    str6 += instrument.LatinName.ToString() + FileService.GetSuffix(YMarNSC, AdjustPricesCondition);
                                     break;
                                 case ColumnType.Symbol:
-                                    str6 += instrument.Symbol.Replace(" ", "_").ToString();
-                                    if (instrument.YMarNSC != "ID")
-                                    {
-                                        if (settings.AdjustPricesCondition == 1)
-                                        {
-                                            str6 += "-ت";
-                                            break;
-                                        }
-                                        if (settings.AdjustPricesCondition == 2)
-                                        {
-                                            str6 += "-ا";
-                                            break;
-                                        }
-                                        break;
-                                    }
+                                    str6 += instrument.Symbol.Replace(" ", "_").ToString() + FileService.GetSuffix(YMarNSC, AdjustPricesCondition, true);
                                     break;
                                 case ColumnType.Name:
-                                    str6 += instrument.Name.Replace(" ", "_").ToString();
-                                    if (instrument.YMarNSC != "ID")
-                                    {
-                                        if (settings.AdjustPricesCondition == 1)
-                                        {
-                                            str6 += "-ت";
-                                            break;
-                                        }
-                                        if (settings.AdjustPricesCondition == 2)
-                                        {
-                                            str6 += "-ا";
-                                            break;
-                                        }
-                                        break;
-                                    }
+                                    str6 += instrument.Name.Replace(" ", "_").ToString() + FileService.GetSuffix(YMarNSC, AdjustPricesCondition, true);
                                     break;
                                 case ColumnType.Date:
                                     str6 += closingPriceInfo.DEven.ToString();

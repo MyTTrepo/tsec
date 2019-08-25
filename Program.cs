@@ -58,22 +58,21 @@ namespace ConsoleApplication1
                             // (gaps / cp.Count) = I don't understand this yet.
                             if (settings.AdjustPricesCondition == 1 && (gaps / cp.Count < 0.08 || settings.AdjustPricesCondition == 2)) { // cond 2 (kinda)
                                 for (int i = cp.Count - 2; i >= 0; --i) { // for each cp (2ndlast to first)
+                                    Predicate<TseShareInfo> aShareThatsDifferent = p => {
+                                        if (p.InsCode.ToString().Equals(currentItemInscode)) {
+                                            return p.DEven == cp[i + 1].DEven;
+                                        }
+                                        return false;
+                                    };
+
                                     if (settings.AdjustPricesCondition == 1 && cp[i].PClosing != cp[i + 1].PriceYesterday) { // if found gap
                                         num2 = num2 * cp[i + 1].PriceYesterday / cp[i].PClosing; // divide tomorrow's PriceYesterday by today's PClosing
                                     } else if (
                                         settings.AdjustPricesCondition == 2 &&
                                         cp[i].PClosing != cp[i + 1].PriceYesterday &&
-                                        StaticData.TseShares.Exists((Predicate<TseShareInfo>)(p => {
-                                            if (p.InsCode.ToString().Equals(currentItemInscode)) return p.DEven == cp[i + 1].DEven;
-                                            return false;
-                                        }))
+                                        StaticData.TseShares.Exists(aShareThatsDifferent)
                                     ) { // do:
-                                        var something = StaticData.TseShares.Find((Predicate<TseShareInfo>)(p => {
-                                            if (p.InsCode.ToString().Equals(currentItemInscode)) {
-                                                return p.DEven == cp[i + 1].DEven;
-                                            }
-                                            return false;
-                                        }));
+                                        var something = StaticData.TseShares.Find(aShareThatsDifferent);
                                         decimal oldShares = something.NumberOfShareOld;
                                         decimal newShares = something.NumberOfShareNew;
                                         num2 = (num2 * oldShares) / newShares;
