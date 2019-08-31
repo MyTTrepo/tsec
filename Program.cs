@@ -32,7 +32,7 @@ namespace ConsoleApplication1
                     Console.WriteLine("\n\tمقدار فیلد محل ذخیره فایل ها صحیح نمی باشد ");
                     return false;
                 }
-
+                int cond = settings.AdjustPricesCondition;
                 //settings.StartDate = settings.StartDate.Replace("/", "").ToString(); // unnecessary
                 DateTime dateTime = Utility.ConvertJalaliStringToDateTime(settings.StartDate);
                 int startDeven = dateTime.Year * 10000 + dateTime.Month * 100 + dateTime.Day;
@@ -41,22 +41,24 @@ namespace ConsoleApplication1
                         string currentItemInscode = enumerator.Current;
                         List<ClosingPriceInfo> cp = FileService.ClosingPrices(Convert.ToInt64(currentItemInscode)); // all closing prices of a selected instrument
                         cp = cp.FindAll((Predicate<ClosingPriceInfo>)(p => p.DEven >= startDeven));
-                        if ((settings.AdjustPricesCondition == 1 || settings.AdjustPricesCondition == 2) && cp.Count > 1) { // for both adjust conds
+                        if ((cond == 1 || cond == 2) && cp.Count > 1) { // for both adjust conds
                             List<ClosingPriceInfo> closingPriceInfoList = new List<ClosingPriceInfo>();
                             Decimal num2 = new Decimal(1);
                             closingPriceInfoList.Add(cp[cp.Count - 1]);
                             double gaps = 0.0; // number of price gaps happened in whole history (capital-increase, dividends, intrument open-closes, etc)
-                            if (settings.AdjustPricesCondition == 1) { // cond 1
-                                for (int index = cp.Count - 2; index >= 0; --index) { // for each cp (2ndlast to first)
-                                    if (cp[index].PClosing != cp[index + 1].PriceYesterday) {
+                            if (cond == 1) { // cond 1
+                                for (int i = cp.Count - 2; i >= 0; --i) { // for each cp (2ndlast to first)
+                                    if (cp[i].PClosing != cp[i + 1].PriceYesterday) {
                                         ++gaps;
                                     }
                                 }
                                 // above for loop detects capital increases, dividends or any kind of price gaps
                                 // formula: if closing price of previous day is not equal to today's yesterday-price
+                                // (if closing price of a day is not equal to yesterday-price of the next day)
                             }
                             // (gaps / cp.Count) = I don't understand this yet.
-                            if (settings.AdjustPricesCondition == 1 && (gaps / cp.Count < 0.08 || settings.AdjustPricesCondition == 2)) { // cond 2 (kinda)
+                            // maybe if (gaps / cp.count) is < 0.08, then it's an indication of capital-increase & dividends
+                            if (cond == 1 && (gaps / cp.Count < 0.08 || cond == 2)) { // cond 2 (kinda)
                                 for (int i = cp.Count - 2; i >= 0; --i) { // for each cp (2ndlast to first)
                                     Predicate<TseShareInfo> aShareThatsDifferent = p => {
                                         if (p.InsCode.ToString().Equals(currentItemInscode)) {
@@ -64,14 +66,11 @@ namespace ConsoleApplication1
                                         }
                                         return false;
                                     };
+                                    bool pricesDontMatch = cp[i].PClosing != cp[i + 1].PriceYesterday;
 
-                                    if (settings.AdjustPricesCondition == 1 && cp[i].PClosing != cp[i + 1].PriceYesterday) { // if found gap
-                                        num2 = num2 * cp[i + 1].PriceYesterday / cp[i].PClosing; // divide tomorrow's PriceYesterday by today's PClosing
-                                    } else if (
-                                        settings.AdjustPricesCondition == 2 &&
-                                        cp[i].PClosing != cp[i + 1].PriceYesterday &&
-                                        StaticData.TseShares.Exists(aShareThatsDifferent)
-                                    ) { // do:
+                                    if (cond == 1 && pricesDontMatch) { // if found gap
+                                        num2 = num2 * cp[i + 1].PriceYesterday / cp[i].PClosing; // tomorrow's PriceYesterday / today's PClosing
+                                    } else if ( cond == 2 && pricesDontMatch && StaticData.TseShares.Exists(aShareThatsDifferent) ) {
                                         var something = StaticData.TseShares.Find(aShareThatsDifferent);
                                         decimal oldShares = something.NumberOfShareOld;
                                         decimal newShares = something.NumberOfShareNew;
