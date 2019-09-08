@@ -25,7 +25,7 @@ namespace ConsoleApplication1
         {
             try {
                 Settings settings = new Settings();
-                settings.AdjustPricesCondition = 1; // me
+                settings.AdjustPricesCondition = 2; // me
                 //string path = settings.AdjustPricesCondition != 0 ? settings.AdjustedStorageLocation : settings.StorageLocation;
                 string path = "./"; // me
                 if ((string.IsNullOrEmpty(path) || !Directory.Exists(path))) { // && this.isVisual
@@ -58,7 +58,7 @@ namespace ConsoleApplication1
                             }
                             // (gaps / cp.Count) = I don't understand this yet.
                             // maybe if (gaps / cp.count) is < 0.08, then it's an indication of capital-increase & dividends
-                            if (cond == 1 && (gaps / cp.Count < 0.08 || cond == 2)) { // cond 2 (kinda)
+                            if ( (cond == 1 && gaps / cp.Count < 0.08) || cond == 2 ) { // cond 2 (kinda)
                                 for (int i = cp.Count - 2; i >= 0; --i) { // for each cp (2ndlast to first)
                                     Predicate<TseShareInfo> aShareThatsDifferent = p => {
                                         if (p.InsCode.ToString().Equals(currentItemInscode)) {
